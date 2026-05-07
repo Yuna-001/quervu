@@ -16,7 +16,7 @@ import { clientFetch } from '@/lib/fetch/client';
 import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
 
-export function DeleteAccount() {
+export function DeleteAccountButton() {
   const handleDeleteAccount = async () => {
     try {
       const result = await clientFetch(`/api/me`, {

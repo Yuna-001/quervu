@@ -9,7 +9,7 @@ import { createDeferred } from '@/test/utils/async';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { toast } from 'sonner';
-import { QuestionBookmarkButton } from './question-bookmark-button';
+import { BookmarkQuestionButton } from './bookmark-question-button';
 
 jest.mock('@/lib/fetch/client', () => ({
   clientFetch: jest.fn(),
@@ -23,11 +23,11 @@ const mockClientFetch = clientFetch as unknown as MockClientFetch;
 
 const QUESTION_ID = 'q1';
 
-describe('QuestionBookmarkButton', () => {
+describe('BookmarkQuestionButton', () => {
   describe('초기 렌더링', () => {
     test('북마크되지 않은 상태면 북마크 추가 버튼으로 표시한다', () => {
       render(
-        <QuestionBookmarkButton
+        <BookmarkQuestionButton
           questionId={QUESTION_ID}
           initialIsBookmarked={false}
         />,
@@ -39,7 +39,7 @@ describe('QuestionBookmarkButton', () => {
 
     test('북마크된 상태면 북마크 해제 버튼으로 표시한다', () => {
       render(
-        <QuestionBookmarkButton
+        <BookmarkQuestionButton
           questionId={QUESTION_ID}
           initialIsBookmarked={true}
         />,
@@ -60,7 +60,7 @@ describe('QuestionBookmarkButton', () => {
       const user = userEvent.setup();
 
       render(
-        <QuestionBookmarkButton
+        <BookmarkQuestionButton
           questionId={QUESTION_ID}
           initialIsBookmarked={false}
         />,
@@ -95,7 +95,7 @@ describe('QuestionBookmarkButton', () => {
       const user = userEvent.setup();
 
       render(
-        <QuestionBookmarkButton
+        <BookmarkQuestionButton
           questionId={QUESTION_ID}
           initialIsBookmarked={false}
         />,
@@ -116,7 +116,7 @@ describe('QuestionBookmarkButton', () => {
       const user = userEvent.setup();
 
       render(
-        <QuestionBookmarkButton
+        <BookmarkQuestionButton
           questionId={QUESTION_ID}
           initialIsBookmarked={false}
         />,
@@ -140,7 +140,7 @@ describe('QuestionBookmarkButton', () => {
       const user = userEvent.setup();
 
       render(
-        <QuestionBookmarkButton
+        <BookmarkQuestionButton
           questionId={QUESTION_ID}
           initialIsBookmarked={false}
         />,
@@ -165,7 +165,7 @@ describe('QuestionBookmarkButton', () => {
       const user = userEvent.setup();
 
       render(
-        <QuestionBookmarkButton
+        <BookmarkQuestionButton
           questionId={QUESTION_ID}
           initialIsBookmarked={false}
         />,

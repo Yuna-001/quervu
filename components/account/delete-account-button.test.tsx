@@ -5,7 +5,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
-import { DeleteAccount } from './delete-account';
+import { DeleteAccountButton } from './delete-account-button';
 
 jest.mock('next-auth/react', () => ({
   signOut: jest.fn(),
@@ -24,7 +24,7 @@ const mockClientFetch = clientFetch as unknown as MockClientFetch;
 describe('DeleteAccount', () => {
   const setup = () => {
     const user = userEvent.setup();
-    render(<DeleteAccount />);
+    render(<DeleteAccountButton />);
 
     return { user };
   };

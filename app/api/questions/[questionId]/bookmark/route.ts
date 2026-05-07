@@ -75,7 +75,7 @@ export async function PUT(req: Request, { params }: RouteParams) {
 
     // 현재 사용자의 질문인지 확인하며 북마크 상태 업데이트
     const updatedQuestion = await QuestionModel.findOneAndUpdate(
-      { _id: questionId, userId: new Types.ObjectId(userId) },
+      { _id: questionId, userId },
       { isBookmarked },
       { new: true },
     );

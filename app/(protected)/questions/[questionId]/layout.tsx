@@ -1,4 +1,4 @@
-import { QuestionBookmarkButton } from '@/components/bookmark/question-bookmark-button';
+import { BookmarkQuestionButton } from '@/components/bookmark/bookmark-question-button';
 import { RetryButton } from '@/components/common/retry-button';
 import { DeleteQuestionButton } from '@/components/question/delete-question-button';
 import { QuestionDetailSection } from '@/components/question/question-detail-section';
@@ -43,7 +43,7 @@ export default async function QuestionLayout({
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-4">
         <div className="flex justify-end gap-3">
-          <QuestionBookmarkButton
+          <BookmarkQuestionButton
             questionId={questionId}
             initialIsBookmarked={isBookmarked}
             size={26}

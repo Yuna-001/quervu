@@ -3,7 +3,6 @@ import { requireUserId } from '@/lib/auth/requireUserId';
 import dbConnect from '@/lib/dbConnect';
 import { HttpError } from '@/lib/error';
 import ProfileModel from '@/models/profile';
-import { Types } from 'mongoose';
 import { NextResponse } from 'next/server';
 
 // DELETE /api/me
@@ -38,7 +37,7 @@ export async function DELETE() {
 
     await dbConnect();
 
-    await ProfileModel.deleteOne({ userId: new Types.ObjectId(userId) });
+    await ProfileModel.deleteOne({ userId });
 
     await authAdapter.deleteUser(userId);
 

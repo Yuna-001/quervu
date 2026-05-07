@@ -5,19 +5,19 @@ import { Bookmark } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-type QuestionBookmarkButtonProps = {
+type BookmarkQuestionButtonProps = {
   questionId: string;
   initialIsBookmarked: boolean;
   className?: string;
   size?: number;
 };
 
-export function QuestionBookmarkButton({
+export function BookmarkQuestionButton({
   questionId,
   initialIsBookmarked,
   className,
   size = 32,
-}: QuestionBookmarkButtonProps) {
+}: BookmarkQuestionButtonProps) {
   const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
   const [isSaving, setIsSaving] = useState(false);
 

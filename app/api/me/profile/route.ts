@@ -4,7 +4,6 @@ import dbConnect from '@/lib/dbConnect';
 import { HttpError } from '@/lib/error';
 import ProfileModel from '@/models/profile';
 import type { Profile, ProfileResponse } from '@/types/profile';
-import { Types } from 'mongoose';
 import { NextResponse } from 'next/server';
 
 // GET /api/me/profile
@@ -35,7 +34,7 @@ export async function GET() {
 
     // 사용자 프로필 조회
     const profile = await ProfileModel.findOne({
-      userId: new Types.ObjectId(userId),
+      userId,
     }).lean<Profile | null>();
 
     // 프로필이 없으면 기본값 반환
@@ -167,7 +166,7 @@ export async function PUT(req: Request) {
 
     // 프로필이 없으면 새로 생성, 있으면 내용 업데이트
     await ProfileModel.findOneAndUpdate(
-      { userId: new Types.ObjectId(userId) },
+      { userId },
       {
         $set: {
           position: normalizedPosition,

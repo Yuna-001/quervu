@@ -50,7 +50,7 @@ export async function GET(_req: Request, { params }: RouteParams) {
     const question = await QuestionModel.findOne(
       {
         _id: questionId,
-        userId: new Types.ObjectId(userId),
+        userId,
       },
       {
         _id: 0,

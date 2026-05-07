@@ -5,7 +5,6 @@ import { HttpError } from '@/lib/error';
 import ProfileModel from '@/models/profile';
 import QuestionModel from '@/models/question';
 import type { Profile } from '@/types/profile';
-import { Types } from 'mongoose';
 import { NextResponse } from 'next/server';
 
 type GeneratedQuestion = {
@@ -90,14 +89,12 @@ export async function POST() {
   try {
     await dbConnect();
 
-    const userObjectId = new Types.ObjectId(userId);
-
     // 현재 사용자 프로필, 사용자의 이전 질문 목록(최대 50개) 조회
     const [profile, prevQuestions] = await Promise.all([
       ProfileModel.findOne({
-        userId: userObjectId,
+        userId,
       }).lean<Profile | null>(),
-      QuestionModel.find({ userId: userObjectId })
+      QuestionModel.find({ userId })
         .select('content')
         .sort({ createdAt: -1 })
         .limit(50)
@@ -223,7 +220,7 @@ export async function POST() {
 
     // 생성된 질문을 DB에 저장
     const { _id } = await QuestionModel.create({
-      userId: userObjectId,
+      userId,
       content,
       idealAnswer,
       tags: normalizedTags,
