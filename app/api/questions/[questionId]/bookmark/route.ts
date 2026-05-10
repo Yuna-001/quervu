@@ -77,7 +77,7 @@ export async function PUT(req: Request, { params }: RouteParams) {
     const updatedQuestion = await QuestionModel.findOneAndUpdate(
       { _id: questionId, userId },
       { isBookmarked },
-      { new: true },
+      { returnDocument: 'after' },
     );
 
     if (!updatedQuestion) {
