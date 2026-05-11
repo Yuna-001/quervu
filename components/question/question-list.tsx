@@ -1,9 +1,10 @@
 import 'server-only';
 
+import { ResponsivePagination } from '@/components/common/responsive-pagination';
 import { RetryButton } from '@/components/common/retry-button';
+import { QuestionPreviewCard } from '@/components/question/question-preview-card';
 import { serverFetch } from '@/lib/fetch/server';
 import type { QuestionListResponse } from '@/types/question';
-import { QuestionPreviewCard } from './question-preview-card';
 
 const QUESTIONS_PAGE_SIZE = 5;
 
@@ -39,7 +40,7 @@ export async function QuestionList({
     );
   }
 
-  const { items, totalCount } = result.data;
+  const { items, totalCount, totalPages } = result.data;
 
   return (
     <section className="flex flex-col gap-6">
@@ -61,7 +62,15 @@ export async function QuestionList({
         ))}
       </ul>
 
-      {/**페이지네이션 컴포넌트 추가 필요 */}
+      <ResponsivePagination
+        page={page}
+        totalPages={totalPages}
+        makeHref={(p) => {
+          const qs = new URLSearchParams({ page: String(p) });
+          if (bookmarkFilter) qs.set('bookmarked', '1');
+          return `/?${qs.toString()}`;
+        }}
+      />
     </section>
   );
 }
