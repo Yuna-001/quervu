@@ -74,8 +74,8 @@ describe('CompactPagination', () => {
     // href는 makeHref(1)
     expect(prevLink).toHaveAttribute('href', makeHref(1));
 
-    // 비활성 처리: wrapper에 pointer-events-none이 있어야 함
-    const wrapper = prevLink.closest('.pointer-events-none');
+    // 비활성 처리: wrapper에 aria-disabled가 있어야 함
+    const wrapper = prevLink.closest('[aria-disabled="true"]');
     expect(wrapper).not.toBeNull();
   });
   test('page=totalPages이면 이후(Next)가 pointer-events-none 래퍼로 감싸져 비활성이고 href는 makeHref(totalPages)이다', () => {
@@ -94,8 +94,8 @@ describe('CompactPagination', () => {
     // href는 makeHref(totalPages)
     expect(nextLink).toHaveAttribute('href', makeHref(totalPages));
 
-    // 비활성 처리: wrapper에 pointer-events-none이 있어야 함
-    const wrapper = nextLink.closest('.pointer-events-none');
+    // 비활성 처리: wrapper에 aria-disabled가 있어야 함
+    const wrapper = nextLink.closest('[aria-disabled="true"]');
     expect(wrapper).not.toBeNull();
   });
   test('page가 중간값이면 이전 링크, 다음 링크 href가 makeHref(page-1),makeHref(page+1)로 설정된다', () => {
@@ -131,8 +131,8 @@ describe('FullPagination', () => {
     // href는 makeHref(1)
     expect(prevLink).toHaveAttribute('href', makeHref(1));
 
-    // 비활성 처리: wrapper에 pointer-events-none이 있어야 함
-    const wrapper = prevLink.closest('.pointer-events-none');
+    // 비활성 처리: wrapper에 aria-disabled가 있어야 함
+    const wrapper = prevLink.closest('[aria-disabled="true"]');
     expect(wrapper).not.toBeNull();
   });
   test('page=totalPages이면 이후(Next)가 pointer-events-none 래퍼로 감싸져 비활성이고 href는 makeHref(totalPages)이다', () => {
@@ -151,8 +151,8 @@ describe('FullPagination', () => {
     // href는 makeHref(totalPages)
     expect(nextLink).toHaveAttribute('href', makeHref(totalPages));
 
-    // 비활성 처리: wrapper에 pointer-events-none이 있어야 함
-    const wrapper = nextLink.closest('.pointer-events-none');
+    // 비활성 처리: wrapper에 aria-disabled가 있어야 함
+    const wrapper = nextLink.closest('[aria-disabled="true"]');
     expect(wrapper).not.toBeNull();
   });
   test('page가 중간값이면 이전 링크, 다음 링크 href가 makeHref(page-1),makeHref(page+1)로 설정된다', () => {

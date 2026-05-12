@@ -45,7 +45,10 @@ export function CompactPagination({
           {page > 1 ? (
             <PaginationPrevious href={makeHref(prevPage)} />
           ) : (
-            <span className="pointer-events-none opacity-50">
+            <span
+              aria-disabled="true"
+              className="pointer-events-none opacity-50"
+            >
               <PaginationPrevious href={makeHref(1)} />
             </span>
           )}
@@ -61,7 +64,10 @@ export function CompactPagination({
           {page < totalPages ? (
             <PaginationNext href={makeHref(nextPage)} />
           ) : (
-            <span className="pointer-events-none opacity-50">
+            <span
+              aria-disabled="true"
+              className="pointer-events-none opacity-50"
+            >
               <PaginationNext href={makeHref(totalPages)} />
             </span>
           )}
@@ -85,7 +91,10 @@ export function FullPagination({
           {page > 1 ? (
             <PaginationPrevious href={makeHref(page - 1)} />
           ) : (
-            <span className="pointer-events-none opacity-50">
+            <span
+              aria-disabled="true"
+              className="pointer-events-none opacity-50"
+            >
               <PaginationPrevious href={makeHref(1)} />
             </span>
           )}
@@ -109,7 +118,10 @@ export function FullPagination({
           {page < totalPages ? (
             <PaginationNext href={makeHref(page + 1)} />
           ) : (
-            <span className="pointer-events-none opacity-50">
+            <span
+              aria-disabled="true"
+              className="pointer-events-none opacity-50"
+            >
               <PaginationNext href={makeHref(totalPages)} />
             </span>
           )}
