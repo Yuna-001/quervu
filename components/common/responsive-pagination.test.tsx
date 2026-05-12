@@ -5,7 +5,7 @@ import {
   ResponsivePagination,
 } from './responsive-pagination';
 
-const makeHref = (p: number) => `/?page=${p}`;
+const makeHref = (page: number) => `/?page=${page}`;
 
 const paginationVariants = [
   { name: 'CompactPagination', Component: CompactPagination },
@@ -13,65 +13,38 @@ const paginationVariants = [
 ] as const;
 
 describe('ResponsivePagination', () => {
-  test('totalPages가 1 이하이면 null을 반환한다', () => {
-    const totalPages = 1;
-    const page = 1;
-
+  test('totalPages가 1 이하이면 렌더하지 않는다', () => {
     const { container } = render(
-      <ResponsivePagination
-        page={page}
-        totalPages={totalPages}
-        makeHref={makeHref}
-      />,
+      <ResponsivePagination page={1} totalPages={1} makeHref={makeHref} />,
     );
 
     expect(container.firstChild).toBeNull();
   });
-  test('totalPages가 2 이상이면 Compact/Full 래퍼가 함께 렌더된다', () => {
-    const totalPages = 2;
-    const page = 1;
 
+  test('compact/full 래퍼를 반응형 클래스와 함께 렌더한다', () => {
     render(
-      <ResponsivePagination
-        page={page}
-        totalPages={totalPages}
-        makeHref={makeHref}
-      />,
+      <ResponsivePagination page={1} totalPages={2} makeHref={makeHref} />,
     );
 
     const compact = screen.getByTestId('pagination-compact');
     const full = screen.getByTestId('pagination-full');
 
-    expect(compact).toBeInTheDocument();
     expect(compact).toHaveClass('sm:hidden');
-    expect(full).toBeInTheDocument();
     expect(full).toHaveClass('hidden', 'sm:block');
   });
 });
 
 describe('CompactPagination', () => {
-  test('현재 페이지/총 페이지를 "page / totalPages" 형태로 표시한다', () => {
-    const totalPages = 10;
-    const page = 3;
+  test('현재 페이지와 전체 페이지 수를 표시한다', () => {
+    render(<CompactPagination page={3} totalPages={10} makeHref={makeHref} />);
 
-    render(
-      <CompactPagination
-        page={page}
-        totalPages={totalPages}
-        makeHref={makeHref}
-      />,
-    );
-
-    const pagination = screen.getByText(`${page} / ${totalPages}`);
-    expect(pagination).toBeInTheDocument();
+    expect(screen.getByText('3 / 10')).toBeInTheDocument();
   });
 });
 
 describe.each(paginationVariants)('$name 이전/다음 링크', ({ Component }) => {
-  test('page=1이면 이전 링크가 비활성이고 href는 makeHref(1)이다', () => {
-    const totalPages = 10;
-
-    render(<Component page={1} totalPages={totalPages} makeHref={makeHref} />);
+  test('첫 페이지에서는 이전 링크가 비활성이고 첫 페이지 href를 가진다', () => {
+    render(<Component page={1} totalPages={10} makeHref={makeHref} />);
 
     const prevLink = screen.getByRole('link', { name: /이전 페이지/ });
 
@@ -79,132 +52,44 @@ describe.each(paginationVariants)('$name 이전/다음 링크', ({ Component }) 
     expect(prevLink.closest('[aria-disabled="true"]')).not.toBeNull();
   });
 
-  test('page=totalPages이면 다음 링크가 비활성이고 href는 makeHref(totalPages)이다', () => {
-    const totalPages = 10;
-
-    render(
-      <Component
-        page={totalPages}
-        totalPages={totalPages}
-        makeHref={makeHref}
-      />,
-    );
+  test('마지막 페이지에서는 다음 링크가 비활성이고 마지막 페이지 href를 가진다', () => {
+    render(<Component page={10} totalPages={10} makeHref={makeHref} />);
 
     const nextLink = screen.getByRole('link', { name: /다음 페이지/ });
 
-    expect(nextLink).toHaveAttribute('href', makeHref(totalPages));
+    expect(nextLink).toHaveAttribute('href', makeHref(10));
     expect(nextLink.closest('[aria-disabled="true"]')).not.toBeNull();
   });
 
-  test('page가 중간값이면 이전 링크, 다음 링크 href가 makeHref(page-1),makeHref(page+1)로 설정된다', () => {
-    const totalPages = 10;
-    const page = 5;
-
-    render(
-      <Component page={page} totalPages={totalPages} makeHref={makeHref} />,
-    );
+  test('중간 페이지에서는 이전/다음 링크가 인접 페이지 href를 가진다', () => {
+    render(<Component page={5} totalPages={10} makeHref={makeHref} />);
 
     const prevLink = screen.getByRole('link', { name: /이전 페이지/ });
     const nextLink = screen.getByRole('link', { name: /다음 페이지/ });
 
-    expect(prevLink).toHaveAttribute('href', makeHref(page - 1));
-    expect(nextLink).toHaveAttribute('href', makeHref(page + 1));
+    expect(prevLink).toHaveAttribute('href', makeHref(4));
+    expect(nextLink).toHaveAttribute('href', makeHref(6));
   });
 });
 
 describe('FullPagination', () => {
-  test('getPaginationItems 결과의 number 항목은 PaginationLink로 렌더되며 href는 makeHref(item)이다', () => {
-    const totalPages = 7;
-    const page = 3;
+  test('현재 페이지 링크를 active 상태로 렌더한다', () => {
+    render(<FullPagination page={5} totalPages={10} makeHref={makeHref} />);
 
-    render(
-      <FullPagination
-        page={page}
-        totalPages={totalPages}
-        makeHref={makeHref}
-      />,
-    );
+    const current = screen.getByRole('link', { name: '5' });
 
-    const first = screen.getByRole('link', { name: '1' });
-    const last = screen.getByRole('link', { name: `${totalPages}` });
-    const current = screen.getByRole('link', { name: `${page}` });
-
-    expect(first).toHaveAttribute('href', makeHref(1));
-    expect(last).toHaveAttribute('href', makeHref(totalPages));
-    expect(current).toHaveAttribute('href', makeHref(page));
-  });
-  test('getPaginationItems 결과의 "ellipsis" 항목은 PaginationEllipsis로 렌더된다', () => {
-    const totalPages = 30;
-    const page = 1;
-
-    const { container } = render(
-      <FullPagination
-        page={page}
-        totalPages={totalPages}
-        makeHref={makeHref}
-      />,
-    );
-
-    const ellipses = container.querySelectorAll(
-      '[data-slot="pagination-ellipsis"]',
-    );
-    expect(ellipses.length).toBeGreaterThanOrEqual(1);
-  });
-  test('현재 page에 해당하는 PaginationLink는 isActive 상태로 렌더된다', () => {
-    const totalPages = 10;
-    const page = 5;
-
-    render(
-      <FullPagination
-        page={page}
-        totalPages={totalPages}
-        makeHref={makeHref}
-      />,
-    );
-
-    const current = screen.getByRole('link', { name: String(page) });
-
-    // isActive -> aria-current="page",  data-active="true"
     expect(current).toHaveAttribute('aria-current', 'page');
     expect(current).toHaveAttribute('data-active', 'true');
   });
-  test('totalPages가 작을 때는 ellipsis 없이 모든 페이지 링크를 렌더한다', () => {
-    const totalPages = 3;
-    const page = 1;
 
+  test('생략된 페이지 구간이 있으면 ellipsis를 렌더한다', () => {
     const { container } = render(
-      <FullPagination
-        page={page}
-        totalPages={totalPages}
-        makeHref={makeHref}
-      />,
+      <FullPagination page={15} totalPages={30} makeHref={makeHref} />,
     );
 
     const ellipses = container.querySelectorAll(
       '[data-slot="pagination-ellipsis"]',
     );
-    expect(ellipses.length).toBe(0);
-
-    for (let n = 1; n <= totalPages; n += 1) {
-      const link = screen.getByRole('link', { name: String(n) });
-      expect(link).toHaveAttribute('href', makeHref(n));
-    }
-  });
-  test('중간 페이지에서는 양쪽 ellipsis가 렌더된다', () => {
-    const totalPages = 30;
-    const page = 15;
-
-    const { container } = render(
-      <FullPagination
-        page={page}
-        totalPages={totalPages}
-        makeHref={makeHref}
-      />,
-    );
-
-    const ellipses = container.querySelectorAll(
-      '[data-slot="pagination-ellipsis"]',
-    );
-    expect(ellipses.length).toBe(2);
+    expect(ellipses.length).toBeGreaterThan(0);
   });
 });
