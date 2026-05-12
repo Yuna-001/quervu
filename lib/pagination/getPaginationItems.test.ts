@@ -81,24 +81,30 @@ const expectCommonInvariants = (
 describe('getPaginationItems', () => {
   describe('총 페이지 수, 현재 페이지에 따른 페이지네이션 표시', () => {
     test.each([
-      // --- totalPages <= minDisplayItems(=7) → ellipsis 없이 전체 노출 ---
+      // 페이지 수가 적으면 ellipsis 없이 모든 페이지를 보여준다.
       { page: 1, totalPages: 1, expected: [1] },
       { page: 1, totalPages: 7, expected: [1, 2, 3, 4, 5, 6, 7] },
       { page: 4, totalPages: 7, expected: [1, 2, 3, 4, 5, 6, 7] },
       { page: 7, totalPages: 7, expected: [1, 2, 3, 4, 5, 6, 7] },
 
-      // --- 초반: !leftEllipsis && rightEllipsis ---
+      // 초반 페이지에서는 앞쪽 연속 페이지와 마지막 페이지를 보여준다.
       { page: 1, totalPages: 8, expected: [1, 2, 3, 4, 5, 'ellipsis', 8] },
       { page: 4, totalPages: 8, expected: [1, 2, 3, 4, 5, 'ellipsis', 8] },
       { page: 1, totalPages: 10, expected: [1, 2, 3, 4, 5, 'ellipsis', 10] },
+      { page: 2, totalPages: 10, expected: [1, 2, 3, 4, 5, 'ellipsis', 10] },
       { page: 3, totalPages: 10, expected: [1, 2, 3, 4, 5, 'ellipsis', 10] },
       { page: 4, totalPages: 10, expected: [1, 2, 3, 4, 5, 'ellipsis', 10] },
 
-      // --- 중간: leftEllipsis && rightEllipsis ---
+      // 중간 페이지에서는 현재 페이지 주변과 양 끝 페이지를 보여준다.
       {
         page: 5,
         totalPages: 10,
         expected: [1, 'ellipsis', 4, 5, 6, 'ellipsis', 10],
+      },
+      {
+        page: 6,
+        totalPages: 10,
+        expected: [1, 'ellipsis', 5, 6, 7, 'ellipsis', 10],
       },
       {
         page: 10,
@@ -106,7 +112,8 @@ describe('getPaginationItems', () => {
         expected: [1, 'ellipsis', 9, 10, 11, 'ellipsis', 20],
       },
 
-      // --- 4) 후반: leftEllipsis && !rightEllipsis ---
+      // 후반 페이지에서는 첫 페이지와 뒤쪽 연속 페이지를 보여준다.
+      { page: 7, totalPages: 10, expected: [1, 'ellipsis', 6, 7, 8, 9, 10] },
       { page: 8, totalPages: 10, expected: [1, 'ellipsis', 6, 7, 8, 9, 10] },
       { page: 10, totalPages: 10, expected: [1, 'ellipsis', 6, 7, 8, 9, 10] },
       { page: 8, totalPages: 8, expected: [1, 'ellipsis', 4, 5, 6, 7, 8] },
@@ -114,6 +121,48 @@ describe('getPaginationItems', () => {
       'page=$page totalPages=$totalPages',
       ({ page, totalPages, expected }) => {
         expect(getPaginationItems(page, totalPages)).toEqual(expected);
+      },
+    );
+  });
+
+  describe('page가 1..totalPages 범위 밖인 경우', () => {
+    test.each([
+      {
+        page: 0,
+        totalPages: 10,
+        expected: [1, 2, 3, 4, 5, 'ellipsis', 10],
+      },
+      {
+        page: -3,
+        totalPages: 10,
+        expected: [1, 2, 3, 4, 5, 'ellipsis', 10],
+      },
+      {
+        page: 11,
+        totalPages: 10,
+        expected: [1, 'ellipsis', 6, 7, 8, 9, 10],
+      },
+      {
+        page: 99,
+        totalPages: 10,
+        expected: [1, 'ellipsis', 6, 7, 8, 9, 10],
+      },
+      {
+        page: 0,
+        totalPages: 7,
+        expected: [1, 2, 3, 4, 5, 6, 7],
+      },
+      {
+        page: 8,
+        totalPages: 7,
+        expected: [1, 2, 3, 4, 5, 6, 7],
+      },
+    ])(
+      'page=$page totalPages=$totalPages',
+      ({ page, totalPages, expected }) => {
+        const items = getPaginationItems(page, totalPages);
+        expect(items).toEqual(expected);
+        expectCommonInvariants(items, totalPages);
       },
     );
   });
