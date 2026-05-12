@@ -4,6 +4,7 @@ export const getPaginationItems = (
   page: number,
   totalPages: number,
 ): PaginationToken[] => {
+  const currentPage = Math.min(Math.max(page, 1), totalPages);
   const boundaryCount = 1; // 항상 보여줄 "맨 앞/맨 뒤" 페이지 개수
   const siblingCount = 1; // 현재 페이지 기준으로 좌우에 추가로 보여줄 페이지 개수
 
@@ -29,8 +30,8 @@ export const getPaginationItems = (
   const maxMiddleEnd = totalPages - boundaryCount - 1;
 
   // 현재 페이지 기준으로 middle 범위를 잡되, 허용 범위를 넘지 않도록 범위 내로 제한
-  const leftSibling = Math.max(page - siblingCount, minMiddleStart);
-  const rightSibling = Math.min(page + siblingCount, maxMiddleEnd);
+  const leftSibling = Math.max(currentPage - siblingCount, minMiddleStart);
+  const rightSibling = Math.min(currentPage + siblingCount, maxMiddleEnd);
 
   // 가운데와 양 끝 사이에 생략 구간이 생기면 '...' 표시
   const showLeftEllipsis = leftSibling > minMiddleStart;
