@@ -5,6 +5,7 @@ import { RetryButton } from '@/components/common/retry-button';
 import { QuestionPreviewCard } from '@/components/question/question-preview-card';
 import { serverFetch } from '@/lib/fetch/server';
 import type { QuestionListResponse } from '@/types/question';
+import { BookmarkedQuestionFilter } from '../bookmark/bookmarked-question-filter';
 
 const QUESTIONS_PAGE_SIZE = 5;
 
@@ -51,6 +52,9 @@ export async function QuestionList({
             총 <span className="font-medium text-foreground">{totalCount}</span>
             개
           </p>
+        </div>
+        <div className="flex justify-end">
+          <BookmarkedQuestionFilter />
         </div>
       </div>
 
