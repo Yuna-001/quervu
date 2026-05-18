@@ -84,44 +84,40 @@ export async function POST(req: Request, { params }: RouteParams) {
     );
   }
 
+  let question: { content: string; idealAnswer: string } | null;
+
   try {
     await dbConnect();
 
     // 질문을 조회하여 질문 내용과 이상적 답안 확인
-    const question = await QuestionModel.findOne(
+    question = await QuestionModel.findOne(
       { _id: questionId, userId },
       { content: 1, idealAnswer: 1 },
     ).lean<{ content: string; idealAnswer: string } | null>();
+  } catch (err) {
+    console.error(`POST /api/questions/${questionId}/answers db error`, err);
 
-    if (!question) {
-      return NextResponse.json(
-        { error: '해당 질문을 찾을 수 없습니다.' },
-        { status: 404 },
-      );
-    }
+    return NextResponse.json(
+      { error: '서버 에러가 발생했습니다.' },
+      { status: 500 },
+    );
+  }
 
-    const feedback = await generateFeedback({
+  if (!question) {
+    return NextResponse.json(
+      { error: '해당 질문을 찾을 수 없습니다.' },
+      { status: 404 },
+    );
+  }
+
+  let feedback: Awaited<ReturnType<typeof generateFeedback>>;
+
+  try {
+    feedback = await generateFeedback({
       question: question.content,
       idealAnswer: question.idealAnswer,
       answer,
     });
-
-    const { _id } = await AnswerModel.create({
-      userId,
-      questionId,
-      content: trimmedAnswer,
-      feedback,
-    });
-
-    // 질문의 lastActivityAt 필드 업데이트
-    await QuestionModel.updateOne(
-      { _id: questionId, userId },
-      { $currentDate: { lastActivityAt: true } },
-    );
-
-    const answerId = _id.toString();
-
-    return NextResponse.json({ answerId }, { status: 201 });
   } catch (err) {
     // OpenAI API에서 에러 응답이 온 경우
     if (err instanceof OpenAI.APIError) {
@@ -206,6 +202,32 @@ export async function POST(req: Request, { params }: RouteParams) {
       `POST /api/questions/${questionId}/answers unexpected error`,
       err,
     );
+
+    return NextResponse.json(
+      { error: '서버 에러가 발생했습니다.' },
+      { status: 500 },
+    );
+  }
+
+  try {
+    const { _id } = await AnswerModel.create({
+      userId,
+      questionId,
+      content: trimmedAnswer,
+      feedback,
+    });
+
+    // 질문의 lastActivityAt 필드 업데이트
+    await QuestionModel.updateOne(
+      { _id: questionId, userId },
+      { $currentDate: { lastActivityAt: true } },
+    );
+
+    const answerId = _id.toString();
+
+    return NextResponse.json({ answerId }, { status: 201 });
+  } catch (err) {
+    console.error(`POST /api/questions/${questionId}/answers db error`, err);
 
     return NextResponse.json(
       { error: '서버 에러가 발생했습니다.' },
