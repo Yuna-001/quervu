@@ -84,6 +84,13 @@ export async function POST(req: Request, { params }: RouteParams) {
     );
   }
 
+  if (trimmedAnswer.length > 500) {
+    return NextResponse.json(
+      { error: `사용자 답변은 500자 이내여야 합니다.` },
+      { status: 400 },
+    );
+  }
+
   let question: { content: string; idealAnswer: string } | null;
 
   try {
