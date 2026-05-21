@@ -44,3 +44,34 @@ fix: 정적 이미지 요청 프록시 제외
 - 헤더 로고를 public 정적 경로로 참조하도록 변경
 - 확장자가 있는 정적 파일 요청이 인증 프록시를 타지 않도록 matcher 수정
 ```
+
+### 테스트 및 검증
+
+테스트는 현재 코드베이스의 Jest + React Testing Library 패턴을 따른다.
+
+#### 테스트 작성 규칙
+
+- 테스트 파일은 대상 파일과 같은 디렉터리에 `*.test.ts` 또는 `*.test.tsx`로 둔다.
+- 순수 함수나 fetch 파서처럼 DOM이 필요 없는 테스트는 파일 상단에 `/** @jest-environment node */`를 선언한다.
+- 컴포넌트 테스트는 `@testing-library/react`의 `render`, `screen`, `within`, `waitFor`를 우선 사용한다.
+- 사용자 상호작용은 `@testing-library/user-event`의 `userEvent.setup()`을 만들고 `await user.click(...)`, `await user.type(...)`, `await user.clear(...)`처럼 실제 사용자 흐름에 가깝게 검증한다.
+- 요소 조회는 가능한 한 `getByRole`, `getByLabelText`처럼 접근성 기반 쿼리를 우선 사용한다.
+- 상태 검증은 화면 문구뿐 아니라 `aria-pressed`, `aria-checked`, `aria-invalid`, `aria-busy`, `disabled`, `aria-current` 같은 접근성 속성도 함께 확인한다.
+- `clientFetch`, `next/navigation`, `next-auth/react`, `sonner`처럼 외부 의존성이 있는 모듈은 `jest.mock`으로 고립한다.
+- fetch 성공/실패 응답은 `@/test/fixtures/fetch`의 `SUCCESS_204`, `FAIL_500` 같은 공통 fixture를 우선 재사용한다.
+- `clientFetch` mock 타입은 `@/test/types`의 `MockClientFetch`를 사용한다.
+- 로딩 중 상태처럼 Promise가 pending인 순간을 검증해야 하면 `@/test/utils/async`의 `createDeferred()`를 사용한다.
+- 여러 입력값에 대해 같은 동작을 검증할 때는 `test.each`를 사용한다.
+- 새 테스트는 변경 범위에 따라 정상 흐름뿐 아니라 실패 응답, 네트워크 예외, 로딩 상태, 낙관적 업데이트 롤백처럼 사용자가 체감하는 상태 변화를 함께 검증한다.
+
+#### 검증 명령
+
+테스트와 검증 명령은 아래를 사용한다. `npm` 대신 `npm.cmd`를 사용한다.
+
+- `npm.cmd run test`: 전체 테스트 실행
+- `npm.cmd run test:changed`: 변경 파일 관련 테스트 실행
+- `npm.cmd run typecheck`: TypeScript 타입 검사
+- `npm.cmd run lint`: ESLint 검사
+- `npm.cmd run format:check`: Prettier 포맷 검사
+
+변경 후에는 변경 범위에 맞는 테스트와 `typecheck`, `lint` 중 필요한 검증을 실행한다.
