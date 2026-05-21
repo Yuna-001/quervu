@@ -20,12 +20,12 @@ interface AnswerCommonFields {
 
 interface AnswerDoc extends AnswerCommonFields {
   _id: Types.ObjectId;
-  feedback: { score: number } | null;
+  feedback: { score: number };
 }
 
 interface AnswerListItem extends AnswerCommonFields {
   answerId: string;
-  score: number | null;
+  score: number;
 }
 
 const DEFAULT_PAGE = 1;
@@ -115,7 +115,7 @@ export async function GET(req: Request, { params }: RouteParams) {
     const answerList: AnswerListItem[] = answerDocs.map((doc) => ({
       answerId: doc._id.toString(),
       content: doc.content,
-      score: doc.feedback?.score ?? null,
+      score: doc.feedback.score,
       createdAt: doc.createdAt,
     }));
 

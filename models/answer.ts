@@ -12,7 +12,7 @@ interface AnswerDocument {
   userId: Types.ObjectId;
   questionId: Types.ObjectId;
   content: string;
-  feedback: Feedback | null;
+  feedback: Feedback;
   createdAt: Date;
 }
 
@@ -82,8 +82,7 @@ const answerSchema = new Schema<AnswerDocument>(
     },
     feedback: {
       type: feedbackSchema,
-      required: false,
-      default: null,
+      required: true,
     },
   },
   {
