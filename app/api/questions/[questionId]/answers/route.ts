@@ -359,11 +359,17 @@ export async function POST(req: Request, { params }: RouteParams) {
       feedback,
     });
 
-    // 질문의 lastActivityAt 필드 업데이트
-    await QuestionModel.updateOne(
-      { _id: questionId, userId },
-      { $currentDate: { lastActivityAt: true } },
-    );
+    try {
+      await QuestionModel.updateOne(
+        { _id: questionId, userId },
+        { $currentDate: { lastActivityAt: true } },
+      );
+    } catch (err) {
+      console.error(
+        `POST /api/questions/${questionId}/answers failed to update lastActivityAt`,
+        err,
+      );
+    }
 
     const answerId = _id.toString();
 
