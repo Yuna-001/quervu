@@ -67,13 +67,11 @@ const answerSchema = new Schema<AnswerDocument>(
     userId: {
       type: Schema.Types.ObjectId,
       required: true,
-      index: true,
     },
     questionId: {
       type: Schema.Types.ObjectId,
       ref: 'Question',
       required: true,
-      index: true,
     },
     content: {
       type: String,
@@ -89,6 +87,13 @@ const answerSchema = new Schema<AnswerDocument>(
     timestamps: { createdAt: true, updatedAt: false },
   },
 );
+
+answerSchema.index({
+  userId: 1,
+  questionId: 1,
+  createdAt: -1,
+  _id: -1,
+});
 
 export default mongoose.models.Answer ||
   mongoose.model<AnswerDocument>('Answer', answerSchema);
