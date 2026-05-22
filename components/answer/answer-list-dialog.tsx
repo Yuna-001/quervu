@@ -1,6 +1,7 @@
 'use client';
 
 import { AnswerList } from '@/components/answer/answer-list';
+import { DialogPagination } from '@/components/common/dialog-pagination';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -29,6 +30,7 @@ export function AnswerListDialog({ questionId }: AnswerListDialogProps) {
   const [error, setError] = useState<string | null>(null);
 
   const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>();
   const [totalCount, setTotalCount] = useState<number>();
   const [open, setOpen] = useState(false);
   const [answers, setAnswers] = useState<AnswerListItem[]>([]);
@@ -60,6 +62,7 @@ export function AnswerListDialog({ questionId }: AnswerListDialogProps) {
 
       const data = result.data;
       setAnswers(data.items);
+      setTotalPages(data.totalPages);
       setTotalCount(data.totalCount);
     } catch {
       if (requestId !== requestIdRef.current) return;
@@ -88,6 +91,7 @@ export function AnswerListDialog({ questionId }: AnswerListDialogProps) {
   };
 
   const shouldShowTotalCount = totalCount !== undefined;
+  const shouldShowPagination = totalPages !== undefined;
   const shouldShowSkeleton = !hasLoaded;
 
   let description = null;
@@ -125,6 +129,24 @@ export function AnswerListDialog({ questionId }: AnswerListDialogProps) {
     content = <AnswerList questionId={questionId} items={answers} />;
   }
 
+  let pagination = null;
+
+  if (shouldShowSkeleton) {
+    pagination = (
+      <div className="flex justify-center">
+        <Skeleton className="h-8 w-2/3" />
+      </div>
+    );
+  } else if (shouldShowPagination) {
+    pagination = (
+      <DialogPagination
+        page={page}
+        totalPages={totalPages}
+        onPageChange={setPage}
+      />
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
@@ -141,7 +163,10 @@ export function AnswerListDialog({ questionId }: AnswerListDialogProps) {
           {description}
         </DialogHeader>
 
-        {content}
+        <div className="flex flex-col gap-4">
+          {content}
+          {pagination}
+        </div>
       </DialogContent>
     </Dialog>
   );
