@@ -23,7 +23,7 @@ export function DialogPagination(props: ActionPaginationProps) {
   );
 }
 
-function DialogCompactPagination({
+export function DialogCompactPagination({
   page,
   totalPages,
   onPageChange,
@@ -60,7 +60,7 @@ function DialogCompactPagination({
   );
 }
 
-function DialogFullPagination({
+export function DialogFullPagination({
   page,
   totalPages,
   onPageChange,
