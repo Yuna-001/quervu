@@ -8,6 +8,14 @@ export function AnswerList({
   questionId: string;
   items: AnswerListItem[];
 }) {
+  if (items.length === 0) {
+    return (
+      <p className="py-10 text-center text-sm text-slate-700">
+        아직 작성한 답변이 없습니다.
+      </p>
+    );
+  }
+
   return (
     <ul className="flex flex-col gap-4">
       {items.map((item) => (
