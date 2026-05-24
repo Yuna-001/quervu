@@ -7,7 +7,7 @@ import type {
   QuestionDetailCommonFields,
   QuestionDetailResponse,
 } from '@/types/question';
-import { Types } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 import { NextResponse } from 'next/server';
 
 type RouteParams = {
@@ -131,24 +131,38 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
   try {
     await dbConnect();
 
-    // 질문 삭제
-    const deleteResult = await QuestionModel.deleteOne({
-      _id: questionId,
-      userId,
-    });
+    const session = await mongoose.startSession();
+    let deletedCount = 0;
+
+    try {
+      await session.withTransaction(async () => {
+        // 질문 삭제
+        const deleteResult = await QuestionModel.deleteOne({
+          _id: questionId,
+          userId,
+        }).session(session);
+
+        deletedCount = deleteResult.deletedCount;
+
+        if (deletedCount === 0) return;
+
+        // 답변들 삭제
+        await AnswerModel.deleteMany({
+          questionId,
+          userId,
+        }).session(session);
+      });
+    } finally {
+      await session.endSession();
+    }
 
     // 질문이 존재하지 않을 경우 404 반환
-    if (deleteResult.deletedCount === 0) {
+    if (deletedCount === 0) {
       return NextResponse.json(
         { error: '해당 질문을 찾을 수 없습니다.' },
         { status: 404 },
       );
     }
-
-    await AnswerModel.deleteMany({
-      questionId,
-      userId,
-    });
 
     // 삭제 성공 (응답 바디 없음)
     return new NextResponse(null, { status: 204 });
