@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge';
 import type { Feedback } from '@/models/answer';
+import { TagList } from '../common/tag-list';
 
 const getScoreColor = (score: number) => {
   if (score >= 80) return 'text-green-600 dark:text-green-400';
@@ -12,7 +12,7 @@ export function FeedbackSection({ feedback }: { feedback: Feedback }) {
 
   return (
     <section className="flex flex-col gap-6">
-      <h2 className="text-xs font-semibold uppercase tracking-wider">
+      <h2 className="text-lg font-semibold uppercase tracking-wider">
         AI 피드백
       </h2>
 
@@ -31,14 +31,14 @@ export function FeedbackSection({ feedback }: { feedback: Feedback }) {
 
       {strengths.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-sm font-semibold">잘한 점</h3>
+          <h3 className="text-base font-semibold">잘한 점</h3>
           <ul className="flex flex-col gap-1.5">
             {strengths.map((item, i) => (
               <li
                 key={i}
                 className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"
               >
-                <span className="mt-0.5 text-green-500">✓</span>
+                <span className="text-green-500">✓</span>
                 {item}
               </li>
             ))}
@@ -48,14 +48,14 @@ export function FeedbackSection({ feedback }: { feedback: Feedback }) {
 
       {improvements.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-sm font-semibold">개선할 점</h3>
+          <h3 className="text-base font-semibold">개선할 점</h3>
           <ul className="flex flex-col gap-1.5">
             {improvements.map((item, i) => (
               <li
                 key={i}
                 className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"
               >
-                <span className="mt-0.5 text-yellow-500">✦</span>
+                <span className="text-yellow-500">✦</span>
                 {item}
               </li>
             ))}
@@ -66,13 +66,7 @@ export function FeedbackSection({ feedback }: { feedback: Feedback }) {
       {missingKeywords.length > 0 && (
         <div className="flex flex-col gap-2">
           <h3 className="text-sm font-semibold">누락 키워드</h3>
-          <div className="flex flex-wrap gap-1.5">
-            {missingKeywords.map((keyword, i) => (
-              <Badge key={i} variant="outline">
-                {keyword}
-              </Badge>
-            ))}
-          </div>
+          <TagList tags={missingKeywords} />
         </div>
       )}
     </section>

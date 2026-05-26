@@ -3,6 +3,8 @@ import { RetryAnswerButton } from '@/components/answer/retry-answer-button';
 import { RetryButton } from '@/components/common/retry-button';
 import { AnswerSection } from '@/components/feedback/answer-section';
 import { FeedbackSection } from '@/components/feedback/feedback-section';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 import { serverFetch } from '@/lib/fetch/server';
 import type { AnswerResponse } from '@/types/answer';
 import { notFound } from 'next/navigation';
@@ -34,13 +36,16 @@ export default async function FeedbackPage({
   const { content: answer, feedback } = result.data;
 
   return (
-    <div className="flex flex-col gap-8">
-      <AnswerSection answer={answer} />
-      <FeedbackSection feedback={feedback} />
-      <div className="flex gap-3">
-        <DeleteAnswerButton questionId={questionId} answerId={answerId} />
+    <Card className="flex flex-col gap-8">
+      <CardContent className="flex flex-col gap-8">
+        <AnswerSection answer={answer} />
+        <Separator />
+        <FeedbackSection feedback={feedback} />
+      </CardContent>
+      <CardFooter className="flex gap-3 justify-end">
         <RetryAnswerButton questionId={questionId} />
-      </div>
-    </div>
+        <DeleteAnswerButton questionId={questionId} answerId={answerId} />
+      </CardFooter>
+    </Card>
   );
 }
