@@ -39,6 +39,8 @@ const FEEDBACK_SYSTEM_PROMPT = [
   '- score는 0 이상 100 이하의 정수로만 작성합니다.',
   '- summary는 한국어 존댓말로 작성합니다.',
   '- strengths, improvements의 각 요소는 한국어 존댓말 한 문장으로 작성합니다.',
+  '- summary, strengths, improvements에 지원자, 후보자, 사용자, 당신 같은 답변자 지칭 표현을 사용하지 마세요.',
+  '  필요한 경우 "답변" 또는 "제시된 답변"처럼 중립적인 표현을 사용합니다.',
   '- strengths는 답변에서 실제로 잘 드러난 점만 작성합니다.',
   '- improvements는 다음 답변에서 바로 보완할 수 있도록 구체적으로 작성합니다.',
   '- missingKeywords는 지원자의 답변에서 빠졌거나 충분히 드러나지 않은 핵심 개념을 0~3개 작성합니다.',
