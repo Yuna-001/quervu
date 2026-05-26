@@ -29,46 +29,59 @@ export function FeedbackSection({ feedback }: { feedback: Feedback }) {
         {summary}
       </p>
 
-      {strengths.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <h3 className="text-base font-semibold">잘한 점</h3>
-          <ul className="flex flex-col gap-1.5">
-            {strengths.map((item, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"
-              >
-                <span className="text-green-500">✓</span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <FeedbackPointGroup
+        title="잘한 점"
+        items={strengths}
+        marker="✓"
+        markerClassName="text-green-500"
+      />
 
-      {improvements.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <h3 className="text-base font-semibold">개선할 점</h3>
-          <ul className="flex flex-col gap-1.5">
-            {improvements.map((item, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"
-              >
-                <span className="text-yellow-500">✦</span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <FeedbackPointGroup
+        title="개선할 점"
+        items={improvements}
+        marker="✦"
+        markerClassName="text-yellow-500"
+      />
 
       {missingKeywords.length > 0 && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-sm font-semibold">누락 키워드</h3>
+          <h3 className="text-base font-semibold">누락 키워드</h3>
           <TagList tags={missingKeywords} />
         </div>
       )}
     </section>
+  );
+}
+
+type FeedbackPointGroupProps = {
+  title: string;
+  items: string[];
+  marker: string;
+  markerClassName: string;
+};
+
+function FeedbackPointGroup({
+  title,
+  items,
+  marker,
+  markerClassName,
+}: FeedbackPointGroupProps) {
+  if (items.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <h3 className="text-base font-semibold">{title}</h3>
+      <ul className="flex flex-col gap-1.5">
+        {items.map((item, i) => (
+          <li
+            key={i}
+            className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300"
+          >
+            <span className={markerClassName}>{marker}</span>
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
