@@ -29,8 +29,9 @@ const FEEDBACK_SYSTEM_PROMPT = [
   '- summary, strengths, improvements는 한국어 존댓말로 작성하고, strengths와 improvements의 각 요소는 한 문장으로 작성합니다.',
   '- summary, strengths, improvements에 지원자, 후보자, 사용자, 당신 같은 답변자 지칭 표현을 사용하지 마세요.',
   '  필요한 경우 "답변" 또는 "제시된 답변"처럼 중립적인 표현을 사용합니다.',
-  '- strengths는 답변에서 실제로 잘 드러난 점만 작성합니다.',
-  '- improvements는 다음 답변에서 바로 보완할 수 있도록 구체적으로 작성합니다.',
+  '- strengths는 답변에서 실제로 잘 드러난 점만 0~3개 작성합니다.',
+  '- improvements는 다음 답변에서 바로 보완할 수 있는 점만 0~3개 작성합니다.',
+  '- 억지로 장점이나 개선점을 만들지 마세요.',
   '- missingKeywords는 질문과 모범 답안 예시를 기준으로 중요하지만, 지원자의 답변에서 빠졌거나 충분히 드러나지 않은 핵심 개념을 0~3개 작성합니다.',
   '- missingKeywords는 한국어를 기본으로 작성하되, SSG, CSR, SSR, TypeScript, Closure, Hoisting처럼 일반적으로 영어 약어 또는 영어 명칭으로 쓰는 기술 용어는 그대로 작성합니다.',
   '- 답변에서 이미 의미상 충분히 설명한 개념은 missingKeywords에 포함하지 않습니다.',
@@ -52,15 +53,20 @@ const FEEDBACK_RESPONSE_FORMAT = {
       },
       summary: {
         type: 'string',
+        minLength: 10,
       },
       strengths: {
         type: 'array',
+        minItems: 0,
+        maxItems: 3,
         items: {
           type: 'string',
         },
       },
       improvements: {
         type: 'array',
+        minItems: 0,
+        maxItems: 3,
         items: {
           type: 'string',
         },

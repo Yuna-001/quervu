@@ -161,9 +161,12 @@ const QUESTION_RESPONSE_FORMAT = {
     properties: {
       content: {
         type: 'string',
+        minLength: 10,
       },
       idealAnswer: {
         type: 'string',
+        minLength: 30,
+        maxLength: 500,
       },
       tags: {
         type: 'array',
