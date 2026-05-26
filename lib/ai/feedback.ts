@@ -173,20 +173,52 @@ const parseFeedback = (raw: string): Feedback => {
   };
 };
 
-/** OpenAI로 피드백을 생성한 뒤, 파싱/검증된 피드백을 반환하는 함수 */
-export const generateFeedback = async (
-  input: FeedbackInput,
-): Promise<Feedback> => {
-  const response = await openai.responses.create({
+const createFeedbackResponse = ({
+  input,
+  maxTokens,
+}: {
+  input: FeedbackInput;
+  maxTokens: number;
+}) => {
+  return openai.responses.create({
     model: 'gpt-4.1-mini',
     input: [
       { role: 'system', content: FEEDBACK_SYSTEM_PROMPT },
       { role: 'user', content: createFeedbackUserPrompt(input) },
     ],
     text: { format: FEEDBACK_RESPONSE_FORMAT },
-    max_output_tokens: 900,
+    max_output_tokens: maxTokens,
     temperature: 0,
   });
+};
+
+/** OpenAI로 피드백을 생성한 뒤, 파싱/검증된 피드백을 반환하는 함수 */
+export const generateFeedback = async (
+  input: FeedbackInput,
+): Promise<Feedback> => {
+  let response = await createFeedbackResponse({
+    input,
+    maxTokens: 900,
+  });
+
+  if (response.status === 'incomplete') {
+    console.error('OpenAI feedback response incomplete (1st try)', {
+      incomplete_details: response.incomplete_details,
+    });
+
+    response = await createFeedbackResponse({
+      input,
+      maxTokens: 1400,
+    });
+  }
+
+  if (response.status === 'incomplete') {
+    console.error('OpenAI feedback response incomplete (2nd try)', {
+      incomplete_details: response.incomplete_details,
+    });
+
+    throw new Error('피드백 생성에 실패했습니다. (응답이 너무 깁니다.)');
+  }
 
   const raw = response.output_text;
 
