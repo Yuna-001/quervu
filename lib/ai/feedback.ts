@@ -48,6 +48,49 @@ const FEEDBACK_SYSTEM_PROMPT = [
   '- 위 JSON 객체 하나만 반환하고, 그 외 다른 텍스트는 절대 포함하지 마세요.',
 ].join('\n');
 
+const FEEDBACK_RESPONSE_FORMAT = {
+  type: 'json_schema',
+  name: 'feedback',
+  strict: true,
+  schema: {
+    type: 'object',
+    additionalProperties: false,
+    properties: {
+      score: {
+        type: 'integer',
+      },
+      summary: {
+        type: 'string',
+      },
+      strengths: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
+      },
+      improvements: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
+      },
+      missingKeywords: {
+        type: 'array',
+        items: {
+          type: 'string',
+        },
+      },
+    },
+    required: [
+      'score',
+      'summary',
+      'strengths',
+      'improvements',
+      'missingKeywords',
+    ],
+  },
+} as const;
+
 /** 질문/모범 답안/사용자 답변으로 user 프롬프트 문자열을 생성하는 함수 */
 const createFeedbackUserPrompt = (input: FeedbackInput): string => {
   const { question, idealAnswer, answer } = input;
@@ -140,8 +183,9 @@ export const generateFeedback = async (
       { role: 'system', content: FEEDBACK_SYSTEM_PROMPT },
       { role: 'user', content: createFeedbackUserPrompt(input) },
     ],
-    text: { format: { type: 'json_object' } },
-    max_output_tokens: 700,
+    text: { format: FEEDBACK_RESPONSE_FORMAT },
+    max_output_tokens: 900,
+    temperature: 0,
   });
 
   const raw = response.output_text;
