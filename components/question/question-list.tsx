@@ -58,13 +58,19 @@ export async function QuestionList({
         </div>
       </div>
 
-      <ul className="flex flex-col gap-6">
-        {items.map((item) => (
-          <li key={item.questionId}>
-            <QuestionPreviewCard question={item} />
-          </li>
-        ))}
-      </ul>
+      {items.length === 0 ? (
+        <p className="py-10 text-center text-sm text-muted-foreground">
+          아직 생성된 질문이 없습니다.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-6">
+          {items.map((item) => (
+            <li key={item.questionId}>
+              <QuestionPreviewCard question={item} />
+            </li>
+          ))}
+        </ul>
+      )}
 
       <ResponsivePagination
         page={page}
