@@ -25,7 +25,7 @@ export function CreateQuestionButton() {
       );
 
       if (!result.ok) {
-        toast.error('질문 생성에 실패했습니다.', {
+        toast.error('기술 질문 생성에 실패했습니다.', {
           description: '잠시 후 다시 시도해주세요.',
         });
         return;
@@ -48,9 +48,9 @@ export function CreateQuestionButton() {
     <LoadingButton
       onClick={handleCreateQuestion}
       isLoading={isCreating}
-      loadingText="질문 생성 중..."
+      loadingText="기술 질문 생성 중..."
     >
-      새로운 질문 생성
+      기술 질문 생성하기
     </LoadingButton>
   );
 }

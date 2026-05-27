@@ -44,7 +44,7 @@ describe('CreateQuestionButton', () => {
 
     await user.click(
       screen.getByRole('button', {
-        name: /새로운 질문 생성/,
+        name: /기술 질문 생성하기/,
       }),
     );
 
@@ -62,7 +62,7 @@ describe('CreateQuestionButton', () => {
 
     await user.click(
       screen.getByRole('button', {
-        name: /새로운 질문 생성/,
+        name: /기술 질문 생성하기/,
       }),
     );
 
@@ -78,11 +78,11 @@ describe('CreateQuestionButton', () => {
 
     await user.click(
       screen.getByRole('button', {
-        name: /새로운 질문 생성/,
+        name: /기술 질문 생성하기/,
       }),
     );
 
-    expect(toast.error).toHaveBeenCalledWith('질문 생성에 실패했습니다.', {
+    expect(toast.error).toHaveBeenCalledWith('기술 질문 생성에 실패했습니다.', {
       description: '잠시 후 다시 시도해주세요.',
     });
   });
@@ -96,7 +96,7 @@ describe('CreateQuestionButton', () => {
 
     await user.click(
       screen.getByRole('button', {
-        name: /새로운 질문 생성/,
+        name: /기술 질문 생성하기/,
       }),
     );
 
@@ -116,14 +116,16 @@ describe('CreateQuestionButton', () => {
     render(<CreateQuestionButton />);
 
     const createButton = screen.getByRole('button', {
-      name: /새로운 질문 생성/,
+      name: /기술 질문 생성하기/,
     });
 
     await user.click(createButton);
 
     expect(mockClientFetch).toHaveBeenCalledTimes(1);
 
-    const loadingButton = screen.getByRole('button', { name: /질문 생성 중/ });
+    const loadingButton = screen.getByRole('button', {
+      name: /기술 질문 생성 중/,
+    });
 
     expect(loadingButton).toBeDisabled();
     expect(mockPush).not.toHaveBeenCalled();
@@ -145,7 +147,7 @@ describe('CreateQuestionButton', () => {
     render(<CreateQuestionButton />);
 
     const createButton = screen.getByRole('button', {
-      name: /새로운 질문 생성/,
+      name: /기술 질문 생성하기/,
     });
 
     await user.click(createButton);
@@ -157,7 +159,7 @@ describe('CreateQuestionButton', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('button', { name: /새로운 질문 생성/ }),
+        screen.getByRole('button', { name: /기술 질문 생성하기/ }),
       ).toBeEnabled();
     });
 
