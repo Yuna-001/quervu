@@ -128,6 +128,7 @@ describe('CreateQuestionButton', () => {
     });
 
     expect(loadingButton).toBeDisabled();
+    expect(screen.getByText('기술 스택을 훑어보는 중...')).toBeInTheDocument();
     expect(mockPush).not.toHaveBeenCalled();
 
     deferred.resolve(SUCCESS_200);
@@ -163,6 +164,9 @@ describe('CreateQuestionButton', () => {
       ).toBeEnabled();
     });
 
+    expect(
+      screen.queryByText('기술 스택을 훑어보는 중...'),
+    ).not.toBeInTheDocument();
     expect(mockPush).not.toHaveBeenCalled();
   });
 });
