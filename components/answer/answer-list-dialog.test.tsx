@@ -253,6 +253,26 @@ describe('AnswerListDialog', () => {
     ).toBeInTheDocument();
   });
 
+  test('페이지 변경 요청이 실패하면 기존 총 개수와 페이지네이션을 숨긴다', async () => {
+    mockClientFetch
+      .mockResolvedValueOnce(PAGE_1_RESPONSE)
+      .mockResolvedValueOnce(FAIL_500);
+    const { user } = renderAnswerListDialog();
+
+    await openDialog(user);
+    expect(await screen.findByText('첫 번째 답변')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '2페이지' }));
+
+    expect(
+      await screen.findByText('답변 목록을 가져오는 데 실패했습니다.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('총 5개')).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText('답변 페이지네이션'),
+    ).not.toBeInTheDocument();
+  });
+
   test('네트워크 오류가 발생하면 에러 문구와 다시 시도 버튼을 표시한다', async () => {
     mockClientFetch.mockRejectedValueOnce(new Error());
     const { user } = renderAnswerListDialog();

@@ -112,14 +112,14 @@ export function AnswerListDialog({ questionId }: AnswerListDialogProps) {
   const shouldShowTotalCount = totalCount !== undefined;
   const shouldShowPagination = totalPages !== undefined;
   const shouldShowInitialSkeleton =
-    isLoading && !shouldShowTotalCount && !shouldShowPagination;
+    !error && isLoading && !shouldShowTotalCount && !shouldShowPagination;
   const shouldShowContentSkeleton = isLoading;
 
   let description = null;
 
   if (shouldShowInitialSkeleton) {
     description = <Skeleton className="h-4 w-20" />;
-  } else if (shouldShowTotalCount) {
+  } else if (!error && shouldShowTotalCount) {
     description = (
       <DialogDescription className="text-left">
         총 {totalCount}개
@@ -158,7 +158,7 @@ export function AnswerListDialog({ questionId }: AnswerListDialogProps) {
         <Skeleton className="h-8 w-2/3" />
       </div>
     );
-  } else if (shouldShowPagination) {
+  } else if (!error && shouldShowPagination) {
     pagination = (
       <DialogPagination
         page={page}
