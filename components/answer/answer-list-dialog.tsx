@@ -111,11 +111,13 @@ export function AnswerListDialog({ questionId }: AnswerListDialogProps) {
 
   const shouldShowTotalCount = totalCount !== undefined;
   const shouldShowPagination = totalPages !== undefined;
-  const shouldShowSkeleton = isLoading;
+  const shouldShowInitialSkeleton =
+    isLoading && !shouldShowTotalCount && !shouldShowPagination;
+  const shouldShowContentSkeleton = isLoading;
 
   let description = null;
 
-  if (shouldShowSkeleton) {
+  if (shouldShowInitialSkeleton) {
     description = <Skeleton className="h-4 w-20" />;
   } else if (shouldShowTotalCount) {
     description = (
@@ -136,7 +138,7 @@ export function AnswerListDialog({ questionId }: AnswerListDialogProps) {
         </Button>
       </div>
     );
-  } else if (shouldShowSkeleton) {
+  } else if (shouldShowContentSkeleton) {
     content = (
       <div className="flex flex-col gap-4">
         {Array.from({ length: pageSize }).map((_, idx) => (
@@ -150,7 +152,7 @@ export function AnswerListDialog({ questionId }: AnswerListDialogProps) {
 
   let pagination = null;
 
-  if (shouldShowSkeleton) {
+  if (shouldShowInitialSkeleton) {
     pagination = (
       <div className="flex justify-center">
         <Skeleton className="h-8 w-2/3" />

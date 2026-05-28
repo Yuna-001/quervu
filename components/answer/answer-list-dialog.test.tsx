@@ -199,7 +199,7 @@ describe('AnswerListDialog', () => {
     expect(screen.getByText('pagination: 1 / 3')).toBeInTheDocument();
   });
 
-  test('페이지 변경 시 해당 페이지를 요청하고 다시 로딩 상태로 전환한다', async () => {
+  test('페이지 변경 중에는 목록만 로딩 상태로 전환하고 총 개수와 페이지네이션을 유지한다', async () => {
     const page2Deferred = createDeferred<
       FetchSuccessResult<AnswerListResponse> | FetchErrorResult
     >();
@@ -217,11 +217,9 @@ describe('AnswerListDialog', () => {
     expect(mockClientFetch).toHaveBeenLastCalledWith(
       `/api/questions/${QUESTION_ID}/answers?limit=2&page=2`,
     );
-    expect(screen.queryByText('총 5개')).not.toBeInTheDocument();
+    expect(screen.getByText('총 5개')).toBeInTheDocument();
     expect(screen.queryByText('첫 번째 답변')).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText('답변 페이지네이션'),
-    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText('답변 페이지네이션')).toBeInTheDocument();
 
     page2Deferred.resolve(PAGE_2_RESPONSE);
 
