@@ -56,7 +56,7 @@ jest.mock('@/components/common/dialog-pagination', () => ({
 const mockClientFetch = clientFetch as unknown as MockClientFetch;
 
 const QUESTION_ID = 'question-1';
-const NEXT_QUESTION_ID = 'question-2';
+const OTHER_QUESTION_ID = 'question-2';
 
 type AnswerListFetchResult =
   | FetchSuccessResult<AnswerListResponse>
@@ -125,7 +125,7 @@ const PAGE_3_RESPONSE = createResponse({
   ],
 });
 
-const NEXT_QUESTION_RESPONSE = createResponse({
+const OTHER_QUESTION_RESPONSE = createResponse({
   page: 1,
   items: [
     {
@@ -205,8 +205,8 @@ describe('AnswerListDialog', () => {
   });
 
   test('답변 목록 요청 중에는 총 개수, 목록, 페이지네이션을 숨긴다', async () => {
-    const deferred = createDeferred<AnswerListFetchResult>();
-    mockClientFetch.mockReturnValueOnce(deferred.promise);
+    const initialRequestDeferred = createDeferred<AnswerListFetchResult>();
+    mockClientFetch.mockReturnValueOnce(initialRequestDeferred.promise);
 
     const { user } = renderAnswerListDialog();
     await openDialog(user);
@@ -217,7 +217,7 @@ describe('AnswerListDialog', () => {
       screen.queryByLabelText('답변 페이지네이션'),
     ).not.toBeInTheDocument();
 
-    deferred.resolve(PAGE_1_RESPONSE);
+    initialRequestDeferred.resolve(PAGE_1_RESPONSE);
 
     expect(await screen.findByText('첫 번째 답변')).toBeInTheDocument();
   });
@@ -390,7 +390,7 @@ describe('AnswerListDialog', () => {
     await openDialog(user);
     expect(await screen.findByText('첫 번째 답변')).toBeInTheDocument();
 
-    mockUsePathname.mockReturnValue(`/questions/${NEXT_QUESTION_ID}`);
+    mockUsePathname.mockReturnValue(`/questions/${OTHER_QUESTION_ID}`);
     rerender(<AnswerListDialog questionId={QUESTION_ID} />);
 
     await waitFor(() => {
@@ -398,7 +398,7 @@ describe('AnswerListDialog', () => {
     });
   });
 
-  test('다이얼로그를 닫은 뒤 이전 응답이 늦게 도착해도 다음 열기 결과를 유지한다', async () => {
+  test('다이얼로그를 닫은 뒤 이전 응답이 늦게 도착해도 다시 열기 결과를 유지한다', async () => {
     const closedDialogDeferred = createDeferred<AnswerListFetchResult>();
     mockClientFetch
       .mockReturnValueOnce(closedDialogDeferred.promise)
@@ -474,13 +474,13 @@ describe('AnswerListDialog', () => {
 
     await openDialog(user);
 
-    rerender(<AnswerListDialog questionId={NEXT_QUESTION_ID} />);
+    rerender(<AnswerListDialog questionId={OTHER_QUESTION_ID} />);
 
     await waitFor(() => {
       expect(mockClientFetch).toHaveBeenCalledTimes(2);
     });
 
-    nextQuestionDeferred.resolve(NEXT_QUESTION_RESPONSE);
+    nextQuestionDeferred.resolve(OTHER_QUESTION_RESPONSE);
     expect(await screen.findByText('최신 요청 답변')).toBeInTheDocument();
 
     firstQuestionDeferred.resolve(PAGE_1_RESPONSE);
