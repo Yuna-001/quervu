@@ -56,7 +56,11 @@ jest.mock('@/components/common/dialog-pagination', () => ({
 const mockClientFetch = clientFetch as unknown as MockClientFetch;
 
 const QUESTION_ID = 'question-1';
-const NEXT_QUESTION_ID = 'question-2';
+const OTHER_QUESTION_ID = 'question-2';
+
+type AnswerListFetchResult =
+  | FetchSuccessResult<AnswerListResponse>
+  | FetchErrorResult;
 
 const createResponse = ({
   items,
@@ -109,14 +113,38 @@ const PAGE_2_RESPONSE = createResponse({
   ],
 });
 
-const NEXT_QUESTION_RESPONSE = createResponse({
-  page: 1,
+const PAGE_3_RESPONSE = createResponse({
+  page: 3,
   items: [
     {
       answerId: 'answer-4',
+      content: '네 번째 답변',
+      score: 90,
+      createdAt: '2026-05-25T03:00:00.000Z',
+    },
+  ],
+});
+
+const OTHER_QUESTION_RESPONSE = createResponse({
+  page: 1,
+  items: [
+    {
+      answerId: 'answer-5',
       content: '최신 요청 답변',
       score: 88,
-      createdAt: '2026-05-25T03:00:00.000Z',
+      createdAt: '2026-05-25T04:00:00.000Z',
+    },
+  ],
+});
+
+const REOPENED_DIALOG_RESPONSE = createResponse({
+  page: 1,
+  items: [
+    {
+      answerId: 'answer-6',
+      content: '다시 열기 요청 답변',
+      score: 82,
+      createdAt: '2026-05-25T05:00:00.000Z',
     },
   ],
 });
@@ -132,9 +160,27 @@ const openDialog = async (user: ReturnType<typeof userEvent.setup>) => {
   await user.click(screen.getByRole('button', { name: '답변 목록' }));
 };
 
+const closeDialog = async (user: ReturnType<typeof userEvent.setup>) => {
+  const dialog = screen.getByRole('dialog');
+  await user.click(within(dialog).getByRole('button', { name: 'Close' }));
+
+  await waitFor(() => {
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+};
+
+const setViewportHeight = (height: number) => {
+  Object.defineProperty(window, 'innerHeight', {
+    value: height,
+    configurable: true,
+    writable: true,
+  });
+};
+
 describe('AnswerListDialog', () => {
   beforeEach(() => {
     mockUsePathname.mockReturnValue(`/questions/${QUESTION_ID}`);
+    setViewportHeight(600);
   });
 
   test('초기 렌더링 시 다이얼로그는 닫혀 있고 API를 호출하지 않는다', () => {
@@ -159,10 +205,8 @@ describe('AnswerListDialog', () => {
   });
 
   test('답변 목록 요청 중에는 총 개수, 목록, 페이지네이션을 숨긴다', async () => {
-    const deferred = createDeferred<
-      FetchSuccessResult<AnswerListResponse> | FetchErrorResult
-    >();
-    mockClientFetch.mockReturnValueOnce(deferred.promise);
+    const initialRequestDeferred = createDeferred<AnswerListFetchResult>();
+    mockClientFetch.mockReturnValueOnce(initialRequestDeferred.promise);
 
     const { user } = renderAnswerListDialog();
     await openDialog(user);
@@ -173,7 +217,7 @@ describe('AnswerListDialog', () => {
       screen.queryByLabelText('답변 페이지네이션'),
     ).not.toBeInTheDocument();
 
-    deferred.resolve(PAGE_1_RESPONSE);
+    initialRequestDeferred.resolve(PAGE_1_RESPONSE);
 
     expect(await screen.findByText('첫 번째 답변')).toBeInTheDocument();
   });
@@ -190,10 +234,8 @@ describe('AnswerListDialog', () => {
     expect(screen.getByText('pagination: 1 / 3')).toBeInTheDocument();
   });
 
-  test('페이지 변경 시 해당 페이지를 요청하고 다시 로딩 상태로 전환한다', async () => {
-    const page2Deferred = createDeferred<
-      FetchSuccessResult<AnswerListResponse> | FetchErrorResult
-    >();
+  test('페이지 변경 중에는 목록만 로딩 상태로 전환하고 총 개수와 페이지네이션을 유지한다', async () => {
+    const page2Deferred = createDeferred<AnswerListFetchResult>();
     mockClientFetch
       .mockResolvedValueOnce(PAGE_1_RESPONSE)
       .mockReturnValueOnce(page2Deferred.promise);
@@ -208,11 +250,9 @@ describe('AnswerListDialog', () => {
     expect(mockClientFetch).toHaveBeenLastCalledWith(
       `/api/questions/${QUESTION_ID}/answers?limit=2&page=2`,
     );
-    expect(screen.queryByText('총 5개')).not.toBeInTheDocument();
+    expect(screen.getByText('총 5개')).toBeInTheDocument();
     expect(screen.queryByText('첫 번째 답변')).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText('답변 페이지네이션'),
-    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText('답변 페이지네이션')).toBeInTheDocument();
 
     page2Deferred.resolve(PAGE_2_RESPONSE);
 
@@ -232,6 +272,26 @@ describe('AnswerListDialog', () => {
     expect(
       screen.getByRole('button', { name: '다시 시도' }),
     ).toBeInTheDocument();
+  });
+
+  test('페이지 변경 요청이 실패하면 기존 총 개수와 페이지네이션을 숨긴다', async () => {
+    mockClientFetch
+      .mockResolvedValueOnce(PAGE_1_RESPONSE)
+      .mockResolvedValueOnce(FAIL_500);
+    const { user } = renderAnswerListDialog();
+
+    await openDialog(user);
+    expect(await screen.findByText('첫 번째 답변')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '2페이지' }));
+
+    expect(
+      await screen.findByText('답변 목록을 가져오는 데 실패했습니다.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('총 5개')).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText('답변 페이지네이션'),
+    ).not.toBeInTheDocument();
   });
 
   test('네트워크 오류가 발생하면 에러 문구와 다시 시도 버튼을 표시한다', async () => {
@@ -266,6 +326,40 @@ describe('AnswerListDialog', () => {
     expect(await screen.findByText('첫 번째 답변')).toBeInTheDocument();
   });
 
+  test('페이지 변경 요청이 실패한 뒤 다시 시도하면 실패한 현재 페이지를 다시 요청한다', async () => {
+    mockClientFetch
+      .mockResolvedValueOnce(PAGE_1_RESPONSE)
+      .mockResolvedValueOnce(FAIL_500)
+      .mockResolvedValueOnce(PAGE_2_RESPONSE);
+    const { user } = renderAnswerListDialog();
+
+    await openDialog(user);
+    expect(await screen.findByText('첫 번째 답변')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '2페이지' }));
+    await screen.findByText('답변 목록을 가져오는 데 실패했습니다.');
+
+    await user.click(screen.getByRole('button', { name: '다시 시도' }));
+
+    expect(mockClientFetch).toHaveBeenCalledTimes(3);
+    expect(mockClientFetch).toHaveBeenLastCalledWith(
+      `/api/questions/${QUESTION_ID}/answers?limit=2&page=2`,
+    );
+    expect(await screen.findByText('세 번째 답변')).toBeInTheDocument();
+  });
+
+  test('현재 페이지를 다시 클릭하면 답변 목록을 재요청하지 않는다', async () => {
+    mockClientFetch.mockResolvedValueOnce(PAGE_1_RESPONSE);
+    const { user } = renderAnswerListDialog();
+
+    await openDialog(user);
+    expect(await screen.findByText('첫 번째 답변')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '1페이지' }));
+
+    expect(mockClientFetch).toHaveBeenCalledTimes(1);
+  });
+
   test('다이얼로그를 닫았다가 다시 열면 page를 1로 초기화한다', async () => {
     mockClientFetch
       .mockResolvedValueOnce(PAGE_1_RESPONSE)
@@ -279,12 +373,7 @@ describe('AnswerListDialog', () => {
     await user.click(screen.getByRole('button', { name: '2페이지' }));
     expect(await screen.findByText('세 번째 답변')).toBeInTheDocument();
 
-    const dialog = screen.getByRole('dialog');
-    await user.click(within(dialog).getByRole('button', { name: 'Close' }));
-
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    });
+    await closeDialog(user);
 
     await openDialog(user);
 
@@ -294,28 +383,125 @@ describe('AnswerListDialog', () => {
     );
   });
 
-  test('pathname이 변경되면 열린 다이얼로그를 닫는다', async () => {
+  test('pathname이 변경되면 열린 다이얼로그를 닫고 원래 경로로 돌아와도 다시 열지 않는다', async () => {
     mockClientFetch.mockResolvedValueOnce(PAGE_1_RESPONSE);
     const { rerender, user } = renderAnswerListDialog();
 
     await openDialog(user);
     expect(await screen.findByText('첫 번째 답변')).toBeInTheDocument();
 
-    mockUsePathname.mockReturnValue(`/questions/${NEXT_QUESTION_ID}`);
+    mockUsePathname.mockReturnValue(`/questions/${OTHER_QUESTION_ID}`);
     rerender(<AnswerListDialog questionId={QUESTION_ID} />);
 
     await waitFor(() => {
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     });
+
+    mockUsePathname.mockReturnValue(`/questions/${QUESTION_ID}`);
+    rerender(<AnswerListDialog questionId={QUESTION_ID} />);
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(mockClientFetch).toHaveBeenCalledTimes(1);
   });
 
-  test('이전 요청이 늦게 끝나도 최신 요청 결과만 반영한다', async () => {
-    const firstQuestionDeferred = createDeferred<
-      FetchSuccessResult<AnswerListResponse> | FetchErrorResult
-    >();
-    const nextQuestionDeferred = createDeferred<
-      FetchSuccessResult<AnswerListResponse> | FetchErrorResult
-    >();
+  test('pathname 변경 뒤 이전 응답이 늦게 도착해도 다시 열기 결과를 유지한다', async () => {
+    const changedPathnameDeferred = createDeferred<AnswerListFetchResult>();
+    mockClientFetch
+      .mockReturnValueOnce(changedPathnameDeferred.promise)
+      .mockResolvedValueOnce(REOPENED_DIALOG_RESPONSE);
+    const { rerender, user } = renderAnswerListDialog();
+
+    await openDialog(user);
+
+    mockUsePathname.mockReturnValue(
+      `/questions/${QUESTION_ID}/answers/answer-1`,
+    );
+    rerender(<AnswerListDialog questionId={QUESTION_ID} />);
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    changedPathnameDeferred.resolve(PAGE_1_RESPONSE);
+
+    mockUsePathname.mockReturnValue(`/questions/${QUESTION_ID}`);
+    rerender(<AnswerListDialog questionId={QUESTION_ID} />);
+
+    await openDialog(user);
+
+    expect(await screen.findByText('다시 열기 요청 답변')).toBeInTheDocument();
+    expect(screen.queryByText('첫 번째 답변')).not.toBeInTheDocument();
+  });
+
+  test('다이얼로그를 닫은 뒤 이전 응답이 늦게 도착해도 다시 열기 결과를 유지한다', async () => {
+    const closedDialogDeferred = createDeferred<AnswerListFetchResult>();
+    mockClientFetch
+      .mockReturnValueOnce(closedDialogDeferred.promise)
+      .mockResolvedValueOnce(REOPENED_DIALOG_RESPONSE);
+    const { user } = renderAnswerListDialog();
+
+    await openDialog(user);
+
+    await closeDialog(user);
+
+    closedDialogDeferred.resolve(PAGE_1_RESPONSE);
+
+    await openDialog(user);
+
+    expect(await screen.findByText('다시 열기 요청 답변')).toBeInTheDocument();
+    expect(screen.queryByText('첫 번째 답변')).not.toBeInTheDocument();
+  });
+
+  test.each([
+    { height: 600, expectedLimit: 2 },
+    { height: 740, expectedLimit: 3 },
+    { height: 900, expectedLimit: 4 },
+  ])(
+    '뷰포트 높이 $height px에서 다이얼로그를 열면 limit=$expectedLimit 로 요청한다',
+    async ({ height, expectedLimit }) => {
+      setViewportHeight(height);
+      mockClientFetch.mockResolvedValueOnce(PAGE_1_RESPONSE);
+      const { user } = renderAnswerListDialog();
+
+      await openDialog(user);
+
+      expect(mockClientFetch).toHaveBeenCalledWith(
+        `/api/questions/${QUESTION_ID}/answers?limit=${expectedLimit}&page=1`,
+      );
+    },
+  );
+
+  test('연속으로 페이지를 변경했을 때 이전 페이지 응답이 늦게 도착해도 마지막으로 요청한 페이지를 유지한다', async () => {
+    const page2Deferred = createDeferred<AnswerListFetchResult>();
+    const page3Deferred = createDeferred<AnswerListFetchResult>();
+    mockClientFetch
+      .mockResolvedValueOnce(PAGE_1_RESPONSE)
+      .mockReturnValueOnce(page2Deferred.promise)
+      .mockReturnValueOnce(page3Deferred.promise);
+    const { user } = renderAnswerListDialog();
+
+    await openDialog(user);
+    expect(await screen.findByText('첫 번째 답변')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '2페이지' }));
+    await user.click(screen.getByRole('button', { name: '3페이지' }));
+
+    page3Deferred.resolve(PAGE_3_RESPONSE);
+    expect(await screen.findByText('네 번째 답변')).toBeInTheDocument();
+    expect(screen.getByText('pagination: 3 / 3')).toBeInTheDocument();
+
+    page2Deferred.resolve(PAGE_2_RESPONSE);
+
+    await waitFor(() => {
+      expect(screen.getByText('네 번째 답변')).toBeInTheDocument();
+      expect(screen.queryByText('세 번째 답변')).not.toBeInTheDocument();
+      expect(screen.getByText('pagination: 3 / 3')).toBeInTheDocument();
+    });
+  });
+
+  test('questionId가 변경됐을 때 이전 질문 응답이 늦게 도착해도 새 질문 결과를 유지한다', async () => {
+    const firstQuestionDeferred = createDeferred<AnswerListFetchResult>();
+    const nextQuestionDeferred = createDeferred<AnswerListFetchResult>();
     mockClientFetch
       .mockReturnValueOnce(firstQuestionDeferred.promise)
       .mockReturnValueOnce(nextQuestionDeferred.promise);
@@ -323,13 +509,13 @@ describe('AnswerListDialog', () => {
 
     await openDialog(user);
 
-    rerender(<AnswerListDialog questionId={NEXT_QUESTION_ID} />);
+    rerender(<AnswerListDialog questionId={OTHER_QUESTION_ID} />);
 
     await waitFor(() => {
       expect(mockClientFetch).toHaveBeenCalledTimes(2);
     });
 
-    nextQuestionDeferred.resolve(NEXT_QUESTION_RESPONSE);
+    nextQuestionDeferred.resolve(OTHER_QUESTION_RESPONSE);
     expect(await screen.findByText('최신 요청 답변')).toBeInTheDocument();
 
     firstQuestionDeferred.resolve(PAGE_1_RESPONSE);
