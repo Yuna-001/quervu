@@ -2,6 +2,7 @@
 
 import { IconTooltip } from '@/components/common/icon-tooltip';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import {
   Sheet,
   SheetClose,
@@ -44,7 +45,7 @@ export function MobileMenu() {
         <SheetHeader>
           <SheetTitle>메뉴</SheetTitle>
         </SheetHeader>
-        <div className="flex flex-col gap-2 px-4">
+        <nav aria-label="설정 페이지" className="flex flex-col gap-1 px-4">
           <SheetClose asChild>
             <Button
               asChild
@@ -69,6 +70,11 @@ export function MobileMenu() {
               </Link>
             </Button>
           </SheetClose>
+        </nav>
+        <div className="px-4">
+          <Separator />
+        </div>
+        <div className="flex flex-col gap-1 px-4">
           <Button
             variant="ghost"
             className="h-10 justify-start gap-2 px-3"
