@@ -18,10 +18,10 @@ export function RetryButton({ title, description }: RetryButtonProps) {
   return (
     <div className="flex max-sm:flex-col gap-4 justify-center items-center">
       <div className="flex flex-col justify-center gap-2">
-        <p className="font-medium text-center">{title}</p>
+        <p className="font-medium text-center break-keep">{title}</p>
         {description && (
           <p
-            className="text-center text-sm text-muted-foreground"
+            className="text-center text-sm text-muted-foreground break-keep"
             data-testid="description"
           >
             {description}
