@@ -143,7 +143,9 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
   return (
     <form noValidate className="flex flex-col gap-4" onSubmit={handleSubmit}>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="position">직무 (필수)</Label>
+        <Label htmlFor="position" className="break-keep">
+          직무 (필수)
+        </Label>
         <Input
           id="position"
           name="position"
@@ -157,7 +159,9 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
         <InputErrorText message={errors.position} />
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="experience">경력 (선택)</Label>
+        <Label htmlFor="experience" className="break-keep">
+          경력 (선택)
+        </Label>
         <div className="relative">
           <Input
             id="experience"
@@ -180,7 +184,9 @@ export function ProfileForm({ initialProfile }: ProfileFormProps) {
         <InputErrorText message={errors.experience} />
       </div>
       <div className="flex flex-col gap-2 mb-4">
-        <Label htmlFor="skills">기술 스택 (선택)</Label>
+        <Label htmlFor="skills" className="break-keep">
+          기술 스택 (선택)
+        </Label>
         <Input
           type="text"
           name="skills"

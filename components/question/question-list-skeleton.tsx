@@ -11,12 +11,12 @@ export function QuestionListSkeleton() {
 
       <div className="flex flex-col gap-6">
         {Array.from({ length: QUESTION_LIST_SKELETON_COUNT }).map((_, idx) => (
-          <Skeleton key={idx} className="h-32 w-full" />
+          <Skeleton key={idx} className="h-44 w-full sm:h-32" />
         ))}
       </div>
 
       <div className="flex justify-center">
-        <Skeleton className="h-9 w-64" />
+        <Skeleton className="h-9 w-30 sm:w-64" />
       </div>
     </div>
   );

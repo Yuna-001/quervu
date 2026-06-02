@@ -38,7 +38,9 @@ export function ProfileView({ profile }: ProfileViewProps) {
         </div>
       </div>
       <div className="flex flex-col gap-2">
-        <Label id="skills-label">기술 스택</Label>
+        <Label id="skills-label" className="break-keep">
+          기술 스택
+        </Label>
         <div aria-labelledby="skills-label" className="space-y-2 mt-2">
           {skills.length > 0 ? <TagList tags={skills} /> : emptyText}
         </div>
