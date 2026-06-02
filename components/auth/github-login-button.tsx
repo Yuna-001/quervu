@@ -12,9 +12,13 @@ export function GitHubLoginButton() {
     <Button
       variant="outline"
       onClick={handleGitHubLogin}
-      className="font-normal"
+      className="gap-1 px-2 text-xs font-normal max-[250px]:size-9 max-[250px]:gap-0 max-[250px]:px-0 sm:gap-1.5 sm:px-2.5 sm:text-sm"
     >
-      <svg viewBox="0 0 98 98" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        viewBox="0 0 98 98"
+        xmlns="http://www.w3.org/2000/svg"
+        className="shrink-0"
+      >
         <path
           fillRule="evenodd"
           clipRule="evenodd"
@@ -23,7 +27,9 @@ export function GitHubLoginButton() {
           className="dark:fill-white"
         />
       </svg>
-      <div className="w-full">GitHub 로그인</div>
+      <div className="min-w-0 flex-1 text-center max-[250px]:sr-only">
+        <span className="text-sm">GitHub 로그인</span>
+      </div>
     </Button>
   );
 }

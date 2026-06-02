@@ -30,7 +30,7 @@ export default function LoginPage() {
         </div>
       </header>
 
-      <div className="flex flex-1 items-center justify-center p-8">
+      <div className="flex flex-1 items-center justify-center px-3 py-8 sm:p-8">
         <Card className="w-full max-w-sm py-10 gap-10 ">
           <CardHeader className="text-center flex flex-col gap-5 items-center">
             <CardTitle className="text-2xl font-bold">로그인</CardTitle>
@@ -38,7 +38,7 @@ export default function LoginPage() {
               Quervu와 함께 기술 면접 준비를 시작하세요.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+          <CardContent className="flex flex-col gap-4 max-[250px]:flex-row max-[250px]:justify-around max-[250px]:mx-2">
             <GoogleLoginButton />
             <GitHubLoginButton />
           </CardContent>
