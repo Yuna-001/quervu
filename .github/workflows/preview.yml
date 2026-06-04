@@ -44,12 +44,14 @@ jobs:
           echo "Files created under .vercel:"
           ls -la .vercel
 
-          if grep -q '^MONGODB_URI=' .vercel/.env.preview.local; then
-            echo "MONGODB_URI exists in .vercel/.env.preview.local"
-          else
-            echo "MONGODB_URI is missing from .vercel/.env.preview.local"
+          value=$(sed -n 's/^MONGODB_URI=//p' .vercel/.env.preview.local)
+
+          if [ -z "$value" ] || [ "$value" = '""' ]; then
+            echo "MONGODB_URI exists but its value is empty."
             exit 1
           fi
+
+          echo "MONGODB_URI exists and is not empty."
           
       - name: Build project artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
