@@ -37,8 +37,20 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel environment information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview --git-branch=${{ github.head_ref }} --token=${{ secrets.VERCEL_TOKEN }}
+     
+      - name: Verify pulled Vercel environment variables
+        run: |
+          echo "Files created under .vercel:"
+          ls -la .vercel
 
+          if grep -q '^MONGODB_URI=' .vercel/.env.preview.local; then
+            echo "MONGODB_URI exists in .vercel/.env.preview.local"
+          else
+            echo "MONGODB_URI is missing from .vercel/.env.preview.local"
+            exit 1
+          fi
+          
       - name: Build project artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
