@@ -1,36 +1,182 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Quervu
 
-## Getting Started
+AI 기반 기술 면접 연습 서비스
 
-First, run the development server:
+사용자 프로필(직군·연차·기술스택)을 바탕으로 AI가 면접 질문을 생성하고, 작성한 답변에 대해 점수·강점·개선점 피드백을 제공합니다.
+
+**[→ 서비스 바로가기](https://quervu.vercel.app)**
+
+---
+
+## 주요 기능
+
+- **AI 면접 질문 생성** — 직군·연차·기술스택 기반 맞춤 질문 생성, 이전 질문 중복 방지
+- **AI 답변 피드백** — 점수(0–100), 강점, 개선점, 누락 키워드 분석
+- **북마크** — 중요한 질문을 따로 모아볼 수 있는 북마크
+- **OAuth 로그인** — Google / GitHub 소셜 로그인
+- **프로필 관리** — 직군·연차·기술스택 설정
+- **다크 모드** — 시스템 설정 연동
+
+---
+
+## 기술 스택
+
+| 분류          | 기술                                                 |
+| ------------- | ---------------------------------------------------- |
+| Core          | Next.js (App Router), React, TypeScript              |
+| UI            | Tailwind CSS v4, Shadcn UI                           |
+| 인증          | NextAuth v5, Google OAuth, GitHub OAuth              |
+| 데이터베이스  | MongoDB, Mongoose                                    |
+| AI            | OpenAI SDK                                           |
+| 테스트 & 품질 | Jest, React Testing Library, ESLint, Prettier, Husky |
+
+---
+
+## 시작하기
+
+### 사전 준비
+
+- Node.js 24+
+- MongoDB Atlas 또는 로컬 MongoDB
+- [Google OAuth 앱](https://console.cloud.google.com/) 등록
+- [GitHub OAuth 앱](https://github.com/settings/developers) 등록
+- OpenAI API 키
+
+### 설치
+
+```bash
+git clone <repository-url>
+cd quervu
+npm install
+```
+
+### 환경 변수 설정
+
+`.env.example`을 복사해 `.env.local`을 생성하고 값을 채웁니다.
+
+```bash
+cp .env.example .env.local
+```
+
+| 변수명               | 설명                                                 |
+| -------------------- | ---------------------------------------------------- |
+| `AUTH_SECRET`        | NextAuth 세션 암호화 키 (`npx auth secret`으로 생성) |
+| `MONGODB_URI`        | MongoDB 연결 문자열                                  |
+| `OPENAI_API_KEY`     | OpenAI API 키                                        |
+| `AUTH_GOOGLE_ID`     | Google OAuth Client ID                               |
+| `AUTH_GOOGLE_SECRET` | Google OAuth Client Secret                           |
+| `AUTH_GITHUB_ID`     | GitHub OAuth App Client ID                           |
+| `AUTH_GITHUB_SECRET` | GitHub OAuth App Client Secret                       |
+
+### 개발 서버 실행
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 확인합니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 프로젝트 구조
 
-## Learn More
+```
+quervu/
+├── app/
+│   ├── (auth)/          # 로그인 페이지
+│   ├── (protected)/     # 인증 필요 페이지 (홈, 질문, 설정)
+│   └── api/             # REST API 라우트
+├── components/          # React 컴포넌트
+├── lib/                 # 유틸리티 (AI 연동, fetch, 포맷, 페이지네이션)
+├── models/              # Mongoose 스키마 (Question, Answer, Profile)
+└── types/               # TypeScript 타입 정의
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 데이터 모델
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```mermaid
+erDiagram
+    USER {
+        ObjectId _id PK
+        string name
+        string email
+        string emailVerified
+        string image
+        date createdAt
+    }
 
-## Deploy on Vercel
+    QUESTION {
+        ObjectId _id PK
+        ObjectId userId FK
+        string content
+        string idealAnswer
+        string[] tags
+        boolean isBookmarked
+        date lastActivityAt
+        date createdAt
+    }
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+    ANSWER {
+        ObjectId _id PK
+        ObjectId userId FK
+        ObjectId questionId FK
+        string content
+        date createdAt
+    }
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+    FEEDBACK {
+        number score
+        string summary
+        string[] strengths
+        string[] improvements
+        string[] missingKeywords
+    }
+
+    PROFILE {
+        ObjectId _id PK
+        ObjectId userId FK
+        string position
+        string[] skills
+        number experience
+        date createdAt
+        date updatedAt
+    }
+
+    ACCOUNT {
+        ObjectId _id PK
+        ObjectId userId FK
+        string provider
+        string providerAccountId
+        string type
+        string token_type
+        string scope
+        string access_token
+        string refresh_token
+        number expires_at
+        string id_token
+    }
+
+    USER ||--o{ QUESTION : "작성"
+    USER ||--o{ ANSWER : "작성"
+    USER ||--o| PROFILE : "보유"
+    USER ||--o{ ACCOUNT : "연결"
+    QUESTION ||--o{ ANSWER : "포함"
+    ANSWER ||--|| FEEDBACK : "포함 (embedded)"
+```
+
+---
+
+## 스크립트
+
+| 명령어                 | 설명                         |
+| ---------------------- | ---------------------------- |
+| `npm run dev`          | 개발 서버 실행               |
+| `npm run build`        | 프로덕션 빌드                |
+| `npm start`            | 프로덕션 서버 실행           |
+| `npm test`             | 전체 테스트 실행             |
+| `npm run test:changed` | 변경 파일 관련 테스트만 실행 |
+| `npm run typecheck`    | TypeScript 타입 검사         |
+| `npm run lint`         | ESLint 검사                  |
+| `npm run format:check` | Prettier 포맷 검사           |
